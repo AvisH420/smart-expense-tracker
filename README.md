@@ -1,4 +1,4 @@
-# SpendSense — Smart Expense Tracker
+# SpendWise — Smart Expense Tracker
 
 An AI-powered expense tracker that understands natural language. Just type *"spent 350 on Ola to airport"* and Gemini auto-categorizes it for you.
 
