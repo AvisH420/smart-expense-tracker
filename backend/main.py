@@ -128,3 +128,16 @@ def delete_expense(expense_id: int):
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail="Expense not found")
     return {"message": "Expense deleted"}
+
+@app.put("/expenses/{expense_id}")
+def update_expense(expense_id: int, expense: ExpenseCreate):
+    conn = get_db()
+    result = conn.execute(
+        "UPDATE expenses SET description = ?, amount = ?, category = ? WHERE id = ?",
+        (expense.description, expense.amount, expense.category, expense_id)
+    )
+    conn.commit()
+    conn.close()
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Expense not found")
+    return {"id": expense_id, **expense.dict(), "message": "Expense updated"}
