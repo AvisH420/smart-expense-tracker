@@ -1,3 +1,4 @@
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { useState, useEffect, useRef } from "react";
 import "./App.css";
 
@@ -23,19 +24,27 @@ export default function App() {
   const [editParsed, setEditParsed] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [listLoading, setListLoading] = useState(true);
   const [error, setError] = useState("");
   const appRef = useRef(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editDraft, setEditDraft] = useState(null);
 
   useEffect(() => {
     if (view === "app") fetchExpenses();
   }, [view]);
 
   async function fetchExpenses() {
-    try {
-      const res = await fetch(`${API}/expenses`);
-      setExpenses(await res.json());
-    } catch { setError("Backend unreachable."); }
+  setListLoading(true);
+  try {
+    const res = await fetch(`${API}/expenses`);
+    setExpenses(await res.json());
+  } catch {
+    setError("Backend unreachable.");
+  } finally {
+    setListLoading(false);
   }
+}
 
   async function handleParse() {
     if (!inputText.trim()) return;
@@ -69,12 +78,39 @@ export default function App() {
   }
 
   async function handleDelete(id) {
+  try {
     await fetch(`${API}/expenses/${id}`, { method: "DELETE" });
     setExpenses(prev => prev.filter(e => e.id !== id));
-  }
+  } catch { setError("Couldn't delete that expense."); }
+}
+  function startEdit(exp) {
+  setEditingId(exp.id);
+  setEditDraft({ description: exp.description, amount: exp.amount, category: exp.category });
+}
+
+function cancelEdit() {
+  setEditingId(null);
+  setEditDraft(null);
+}
+
+async function handleUpdate(id) {
+  try {
+    await fetch(`${API}/expenses/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(editDraft),
+    });
+    cancelEdit();
+    await fetchExpenses();
+  } catch { setError("Couldn't update that expense."); }
+}
 
   const total = expenses.reduce((s, e) => s + e.amount, 0);
   const categoryTotals = expenses.reduce((a, e) => ({ ...a, [e.category]: (a[e.category] || 0) + e.amount }), {});
+  const chartData = Object.entries(categoryTotals).map(([cat, amt]) => ({
+  name: cat,
+  value: amt,
+}));
 
   if (view === "app") {
     return (
@@ -138,28 +174,76 @@ export default function App() {
 
             <section className="t-card list-section">
               <h2 className="t-card-title">All Expenses</h2>
-              {expenses.length === 0
+              {listLoading
+  ? <div className="t-empty"><span className="spin" /><p>Loading...</p></div>
+  :expenses.length === 0
                 ? <div className="t-empty"><span>💸</span><p>No expenses yet.</p></div>
                 : <ul className="expense-list">
                   {expenses.map(e => (
-                    <li key={e.id} className="expense-item">
-                      <span className="e-icon" style={{ background: CATEGORY_COLORS[e.category] + "22" }}>
-                        {CATEGORY_ICONS[e.category]}
-                      </span>
-                      <div className="e-info">
-                        <span className="e-desc">{e.description}</span>
-                        <span className="e-cat">{e.category}</span>
-                      </div>
-                      <span className="e-amt">₹{e.amount.toLocaleString("en-IN")}</span>
-                      <button className="e-del" onClick={() => handleDelete(e.id)}>×</button>
-                    </li>
-                  ))}
+  <li key={e.id} className="expense-item">
+    {editingId === e.id ? (
+      <div className="e-edit">
+        <input
+          className="e-edit-input e-edit-desc"
+          value={editDraft.description}
+          onChange={ev => setEditDraft({ ...editDraft, description: ev.target.value })}
+        />
+        <input
+          className="e-edit-input e-edit-amt"
+          type="number"
+          value={editDraft.amount}
+          onChange={ev => setEditDraft({ ...editDraft, amount: parseFloat(ev.target.value) })}
+        />
+        <select
+          className="e-edit-input"
+          value={editDraft.category}
+          onChange={ev => setEditDraft({ ...editDraft, category: ev.target.value })}
+        >
+          {Object.keys(CATEGORY_ICONS).map(c => <option key={c}>{c}</option>)}
+        </select>
+        <button className="e-save" onClick={() => handleUpdate(e.id)}>✓</button>
+        <button className="e-cancel" onClick={cancelEdit}>×</button>
+      </div>
+    ) : (
+      <>
+        <span className="e-icon" style={{ background: CATEGORY_COLORS[e.category] + "22" }}>
+          {CATEGORY_ICONS[e.category]}
+        </span>
+        <div className="e-info">
+          <span className="e-desc">{e.description}</span>
+          <span className="e-cat">{e.category}</span>
+        </div>
+        <span className="e-amt">₹{e.amount.toLocaleString("en-IN")}</span>
+        <button className="e-edit-btn" onClick={() => startEdit(e)}>✎</button>
+        <button className="e-del" onClick={() => handleDelete(e.id)}>×</button>
+      </>
+    )}
+  </li>
+))}
                 </ul>
               }
             </section>
 
             <section className="t-card summary-section">
               <h2 className="t-card-title">By Category</h2>
+              {chartData.length > 0 && (
+    <div className="chart-wrap">
+      <ResponsiveContainer width="100%" height={200}>
+        <PieChart>
+          <Pie data={chartData} dataKey="value" nameKey="name"
+               cx="50%" cy="50%" innerRadius={52} outerRadius={82} paddingAngle={2}>
+            {chartData.map(entry => (
+              <Cell key={entry.name} fill={CATEGORY_COLORS[entry.name]} stroke="none" />
+            ))}
+          </Pie>
+          <Tooltip
+            formatter={(value) => `₹${value.toLocaleString("en-IN")}`}
+            contentStyle={{ background: "#0e0e1a", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 10, color: "#f2f2f8" }}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
+  )}
               {Object.keys(categoryTotals).length === 0
                 ? <div className="t-empty"><span>📊</span><p>Summary appears here.</p></div>
                 : <ul className="summary-list">

@@ -407,6 +407,30 @@ body { font-family: var(--font-body); background: var(--dark); color: var(--text
 .e-del { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; padding: 0 4px; border-radius: 4px; transition: color 0.15s; }
 .e-del:hover { color: var(--danger); }
 
+.e-edit-btn {
+  background: none; border: none; color: var(--muted); font-size: 14px;
+  cursor: pointer; padding: 0 4px; transition: color 0.15s;
+}
+.e-edit-btn:hover { color: var(--accent); }
+
+.e-edit { display: flex; gap: 6px; width: 100%; align-items: center; }
+.e-edit-input {
+  background: var(--dark2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 8px; font-size: 13px; color: var(--text);
+  font-family: var(--font-body); outline: none;
+}
+.e-edit-input:focus { border-color: var(--accent2); }
+.e-edit-desc { flex: 1; min-width: 0; }
+.e-edit-amt { width: 76px; }
+.e-save {
+  background: var(--success); border: none; color: #062418; font-weight: 700;
+  border-radius: 6px; width: 28px; height: 28px; cursor: pointer; flex-shrink: 0;
+}
+.e-cancel {
+  background: var(--dark3); border: 1px solid var(--border); color: var(--muted);
+  border-radius: 6px; width: 28px; height: 28px; cursor: pointer; flex-shrink: 0;
+}
+
 .t-empty { text-align: center; padding: 40px 20px; color: var(--muted); }
 .t-empty span { font-size: 32px; display: block; margin-bottom: 10px; opacity: 0.5; }
 .t-empty p { font-size: 13px; }
@@ -419,6 +443,7 @@ body { font-family: var(--font-body); background: var(--dark); color: var(--text
 .s-bar { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
 .s-amt { font-family: var(--font-head); font-size: 14px; font-weight: 600; white-space: nowrap; }
 
+.chart-wrap { margin-bottom: 20px; }
 /* ── RESPONSIVE ───────────────────────────────────────── */
 @media (max-width: 900px) {
   .nav { padding: 0 24px; }
