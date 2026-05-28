@@ -55,6 +55,9 @@ class ExpenseCreate(BaseModel):
     amount: float
     category: str
 
+class AskRequest(BaseModel):
+    question: str
+
 # ---------- Routes ----------
 
 @app.get("/")
@@ -96,6 +99,58 @@ Input: "{req.text}"
         return parsed
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gemini parsing failed: {str(e)}")
+
+@app.post("/ask")
+def ask_expenses(req: AskRequest):
+    """
+    Takes a natural-language question about the user's spending,
+    pulls all expenses from the DB, and lets Gemini answer conversationally.
+    """
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT description, amount, category, created_at FROM expenses ORDER BY created_at DESC"
+    ).fetchall()
+    conn.close()
+
+    # No data yet — answer gracefully without even calling Gemini
+    if not rows:
+        return {"answer": "You haven't added any expenses yet, so there's nothing to analyze. Add a few and ask me again!"}
+
+    # Turn the rows into a clean text block Gemini can read
+    expense_lines = "\n".join(
+        f"- {r['description']}: ₹{r['amount']} ({r['category']}) on {r['created_at']}"
+        for r in rows
+    )
+    total = sum(r["amount"] for r in rows)
+
+    prompt = f"""
+You are a friendly personal finance assistant for an app called SpendWise.
+Answer the user's question based ONLY on the expense data provided below.
+
+Rules:
+- All amounts are in Indian Rupees (₹).
+- Be concise and conversational — 2 to 4 sentences maximum.
+- Use the actual numbers from the data when relevant.
+- If the question cannot be answered from the data, say so politely.
+- Never invent expenses that are not in the list.
+
+Total spent so far: ₹{total}
+
+Expense data:
+{expense_lines}
+
+User's question: "{req.question}"
+
+Answer:
+"""
+    try:
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+        return {"answer": response.text.strip()}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gemini failed to answer: {str(e)}")
 
 
 @app.post("/expenses")
