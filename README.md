@@ -6,6 +6,7 @@ your spending.
 
 **Live demo:** welcoming-rebirth-production-e87a.up.railway.app
 
+
 ##  Features
 - **Natural-language expense entry** — type "spent 350 on Ola" and Gemini extracts amount, category, and description.
 - **Ask your expenses** — ask "what's my biggest category?" and get a real answer from your own data.
@@ -19,7 +20,9 @@ your spending.
 - **Deployment:** Railway
 
 ##  Screenshots
-[Add 2–3 screenshots here: landing page, tracker with chart, Ask SpendWise answering]
+<img width="1470" height="810" alt="Screenshot 2026-05-28 at 18 50 14" src="https://github.com/user-attachments/assets/6453f5b9-3483-432a-a23c-58c5bda8c019" />
+<img width="1458" height="760" alt="Screenshot 2026-05-28 at 18 52 25" src="https://github.com/user-attachments/assets/ab7cd93d-6e15-4ce3-984a-0fe972a217b7" />
+
 
 ##  Run Locally
 ### Backend
