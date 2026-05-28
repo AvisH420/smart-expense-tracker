@@ -1,4 +1,4 @@
-# 💸 SpendWise — AI-Powered Smart Expense Tracker
+# SpendWise — AI-Powered Smart Expense Tracker
 
 Track expenses by typing in plain English. SpendWise uses Google Gemini to
 parse what you spent, auto-categorize it, and even answer questions about
@@ -6,22 +6,22 @@ your spending.
 
 **Live demo:** welcoming-rebirth-production-e87a.up.railway.app
 
-## ✨ Features
+##  Features
 - **Natural-language expense entry** — type "spent 350 on Ola" and Gemini extracts amount, category, and description.
 - **Ask your expenses** — ask "what's my biggest category?" and get a real answer from your own data.
 - **Full CRUD** — add, view, edit (inline), and delete expenses.
 - **Visual breakdown** — category donut chart + spend bars.
 - **Editable AI suggestions** — review and correct before saving.
 
-## 🛠 Tech Stack
+##  Tech Stack
 - **Backend:** FastAPI (Python), SQLite, Google Gemini 2.5 Flash
 - **Frontend:** React + Vite
 - **Deployment:** Railway
 
-## 📸 Screenshots
+##  Screenshots
 [Add 2–3 screenshots here: landing page, tracker with chart, Ask SpendWise answering]
 
-## 🚀 Run Locally
+##  Run Locally
 ### Backend
 \`\`\`bash
 cd backend
@@ -36,7 +36,7 @@ npm install
 npm run dev
 \`\`\`
 
-## 📡 API Endpoints
+##  API Endpoints
 | Method | Route | Purpose |
 |--------|-------|---------|
 | POST | /parse-expense | Parse natural-language expense |
