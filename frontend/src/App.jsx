@@ -29,6 +29,9 @@ export default function App() {
   const appRef = useRef(null);
   const [editingId, setEditingId] = useState(null);
   const [editDraft, setEditDraft] = useState(null);
+  const [askQuestion, setAskQuestion] = useState("");
+  const [askAnswer, setAskAnswer] = useState("");
+  const [askLoading, setAskLoading] = useState(false);
 
   useEffect(() => {
     if (view === "app") fetchExpenses();
@@ -61,6 +64,25 @@ export default function App() {
     } catch { setError("Couldn't parse that. Try being more specific."); }
     finally { setLoading(false); }
   }
+
+  async function handleAsk() {
+  if (!askQuestion.trim()) return;
+  setAskLoading(true); setAskAnswer("");
+  try {
+    const res = await fetch(`${API}/ask`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question: askQuestion }),
+    });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    setAskAnswer(data.answer);
+  } catch {
+    setAskAnswer("Sorry, I couldn't answer that right now. Try again in a moment.");
+  } finally {
+    setAskLoading(false);
+  }
+}
 
   async function handleSave() {
     if (!editParsed) return;
@@ -127,7 +149,29 @@ async function handleUpdate(id) {
             <h1 className="tracker-title">Your <em>Expenses</em></h1>
             <div className="total-pill">Total: ₹{total.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</div>
           </div>
-
+          <section className="t-card ask-card">
+          <h2 className="t-card-title">💬 Ask SpendWise</h2>
+          <p className="t-card-sub">Ask anything about your spending — <em>"what's my biggest category?"</em> or <em>"how much did I spend on food?"</em></p>
+          <div className="input-row">
+            <input
+              className="t-input"
+              type="text"
+              placeholder="Ask a question about your expenses..."
+              value={askQuestion}
+              onChange={e => setAskQuestion(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleAsk()}
+            />
+            <button className="t-btn t-btn--primary" onClick={handleAsk} disabled={askLoading || !askQuestion.trim()}>
+              {askLoading ? <span className="spin" /> : "Ask →"}
+            </button>
+          </div>
+          {askAnswer && (
+            <div className="ask-answer">
+              <span className="ask-answer-icon">✦</span>
+              <p>{askAnswer}</p>
+            </div>
+          )}
+        </section>
           <div className="tracker-grid">
             <section className="t-card input-section">
               <h2 className="t-card-title">Add Expense</h2>
