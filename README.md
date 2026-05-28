@@ -4,7 +4,7 @@ Track expenses by typing in plain English. SpendWise uses Google Gemini to
 parse what you spent, auto-categorize it, and even answer questions about
 your spending.
 
-**Live demo:** welcoming-rebirth-production-e87a.up.railway.app
+**Live demo:** [welcoming-rebirth-production-e87a.up.railway.app](https://welcoming-rebirth-production-e87a.up.railway.app)
 
 
 ##  Features
